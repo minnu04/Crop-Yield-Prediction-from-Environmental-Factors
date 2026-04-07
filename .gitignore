@@ -1,0 +1,22 @@
+# Python cache and virtual environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Build/test outputs
+.pytest_cache/
+.coverage
+
+# Generated ML artifacts and data
+data/*.csv
+!data/.gitkeep
+models/*.joblib
+!models/.gitkeep
+outputs/*
+!outputs/.gitkeep
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
