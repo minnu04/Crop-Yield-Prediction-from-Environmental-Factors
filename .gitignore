@@ -15,6 +15,7 @@ models/*.joblib
 !models/.gitkeep
 outputs/*
 !outputs/.gitkeep
+web/app.db
 
 # OS/editor
 .DS_Store

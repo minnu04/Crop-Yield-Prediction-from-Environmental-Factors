@@ -118,6 +118,35 @@ python main.py --mode full --interactive
 python -m unittest discover -s tests -v
 ```
 
+### Web App (Role-Based Access)
+
+The project also includes a website with role-based access for:
+- admin: user management, system usage dashboard, prediction monitoring
+- farmer: run crop yield predictions and view personal prediction history
+
+Run the web app:
+
+```bash
+python web/app.py
+```
+
+Then open:
+
+```text
+http://127.0.0.1:5000
+```
+
+Default admin credentials:
+
+```text
+username: admin
+password: admin123
+```
+
+Important:
+- change the default admin password after first login by creating a new admin user and removing the default account.
+- if model file is missing, train first using `python main.py --mode train-only`.
+
 3. **Using Your Own Data**:
    Place your CSV file at `data/crop_yield_data.csv` with the schema described above, then run:
    ```bash

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="card">
+    <h2>Admin Dashboard</h2>
+    <p class="muted">Welcome, {{ current_user.username }}. Monitor platform usage and manage users.</p>
+
+    <div class="stats-grid">
+        <div class="stat-box"><strong>{{ user_count }}</strong><span>Total Users</span></div>
+        <div class="stat-box"><strong>{{ farmer_count }}</strong><span>Farmers</span></div>
+        <div class="stat-box"><strong>{{ prediction_count }}</strong><span>Total Predictions</span></div>
+    </div>
+</section>
+
+<section class="card">
+    <h3>Recent Predictions</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>User</th>
+                <th>Predicted Yield</th>
+                <th>Timestamp (UTC)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in recent_predictions %}
+            <tr>
+                <td>{{ row['id'] }}</td>
+                <td>{{ row['username'] }}</td>
+                <td>{{ '%.2f'|format(row['predicted_yield']) }}</td>
+                <td>{{ row['created_at'] }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4">No predictions yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

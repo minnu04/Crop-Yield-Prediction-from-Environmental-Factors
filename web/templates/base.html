@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ title or 'Crop Yield Portal' }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header class="topbar">
+        <div class="container row-between">
+            <div class="brand">
+                <h1>Crop Yield Portal</h1>
+                <p>Role-based Analytics for Farmers and Admins</p>
+            </div>
+            {% if current_user.id %}
+            <nav class="nav-links">
+                {% if current_user.role == 'admin' %}
+                <a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
+                <a href="{{ url_for('admin_users') }}">Manage Users</a>
+                {% else %}
+                <a href="{{ url_for('farmer_dashboard') }}">Farmer Dashboard</a>
+                <a href="{{ url_for('farmer_history') }}">Prediction History</a>
+                {% endif %}
+                <a href="{{ url_for('logout') }}">Logout</a>
+                <span class="user-chip">{{ current_user.username }} ({{ current_user.role }})</span>
+            </nav>
+            {% endif %}
+        </div>
+    </header>
+
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-wrap">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+        <p class="footer-note">Crop Yield Prediction Platform</p>
+    </main>
+</body>
+</html>

@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="card">
+    <h2>User Management</h2>
+    <form method="post" class="form-grid two-col">
+        <label>Username
+            <input type="text" name="username" required>
+        </label>
+        <label>Password
+            <input type="password" name="password" required>
+        </label>
+        <label>Role
+            <select name="role" required>
+                <option value="farmer">farmer</option>
+                <option value="admin">admin</option>
+            </select>
+        </label>
+        <button type="submit" class="full-width">Create User</button>
+    </form>
+</section>
+
+<section class="card">
+    <h3>Existing Users</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user['id'] }}</td>
+                <td>{{ user['username'] }}</td>
+                <td>{{ user['role'] }}</td>
+                <td>
+                    {% if user['role'] == 'farmer' and user['approved'] == 0 %}
+                    <span class="muted">Pending Approval</span>
+                    {% else %}
+                    <span class="muted">Approved</span>
+                    {% endif %}
+                </td>
+                <td>{{ user['created_at'] }}</td>
+                <td>
+                    {% if user['role'] == 'farmer' and user['approved'] == 0 %}
+                    <form method="post" action="{{ url_for('admin_approve_user', user_id=user['id']) }}" style="margin-bottom: 8px;">
+                        <button type="submit">Approve</button>
+                    </form>
+                    {% endif %}
+                    {% if user['id'] != current_user.id %}
+                    <form method="post" action="{{ url_for('admin_delete_user', user_id=user['id']) }}">
+                        <button type="submit" class="danger">Delete</button>
+                    </form>
+                    {% else %}
+                    <span class="muted">Current User</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

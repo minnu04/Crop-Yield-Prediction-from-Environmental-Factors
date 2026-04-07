@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="card">
+    <h2>Farmer Dashboard</h2>
+    <p class="muted">Enter field and weather factors to estimate crop yield.</p>
+
+    <form method="post" action="{{ url_for('farmer_predict') }}" class="form-grid two-col">
+        <label>N
+            <input type="number" step="any" name="N" required>
+        </label>
+        <label>P
+            <input type="number" step="any" name="P" required>
+        </label>
+        <label>K
+            <input type="number" step="any" name="K" required>
+        </label>
+        <label>pH
+            <input type="number" step="any" name="pH" required>
+        </label>
+        <label>Organic Matter
+            <input type="number" step="any" name="organic_matter" required>
+        </label>
+        <label>Rainfall
+            <input type="number" step="any" name="rainfall" required>
+        </label>
+        <label>Temp Min
+            <input type="number" step="any" name="temp_min" required>
+        </label>
+        <label>Temp Max
+            <input type="number" step="any" name="temp_max" required>
+        </label>
+        <label>Fertilizer Usage
+            <input type="number" step="any" name="fertilizer_usage" required>
+        </label>
+        <label>Crop Type
+            <select name="crop_type" required>
+                {% for crop in crop_types %}
+                <option value="{{ crop }}">{{ crop }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <button type="submit" class="full-width">Predict Yield</button>
+    </form>
+</section>
+
+{% if predicted_yield is defined %}
+<section class="card success-box">
+    <h3>Prediction Result</h3>
+    <p class="big-number">{{ '%.2f'|format(predicted_yield) }}</p>
+    <p class="muted">Estimated crop yield units</p>
+</section>
+{% endif %}
+{% endblock %}

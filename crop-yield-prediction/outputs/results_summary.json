@@ -1,0 +1,39 @@
+{
+    "model_path": "C:\\Users\\HP\\OneDrive\\Desktop\\Crop-Yield-Prediction-from-Environmental-Factors\\crop-yield-prediction\\models\\crop_yield_rf_pipeline.joblib",
+    "data_shape": [
+        1000,
+        11
+    ],
+    "train_samples": 800,
+    "test_samples": 200,
+    "features": [
+        "N",
+        "P",
+        "K",
+        "pH",
+        "organic_matter",
+        "rainfall",
+        "temp_min",
+        "temp_max",
+        "fertilizer_usage",
+        "crop_type_barley",
+        "crop_type_maize",
+        "crop_type_oats",
+        "crop_type_rice",
+        "crop_type_wheat"
+    ],
+    "best_hyperparameters": {
+        "model__max_depth": null,
+        "model__min_samples_split": 2,
+        "model__n_estimators": 200
+    },
+    "cv_r2_score": 0.7989207929102223,
+    "evaluation": {
+        "r2_train": 0.9757271737351244,
+        "r2_test": 0.8316822544275796,
+        "rmse_train": 3.095497520299717,
+        "rmse_test": 8.720105200209558,
+        "mae_train": 2.4496578032996355,
+        "mae_test": 7.222989362219257
+    }
+}

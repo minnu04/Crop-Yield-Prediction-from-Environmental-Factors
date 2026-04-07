@@ -7,8 +7,19 @@ import sys
 import argparse
 from pathlib import Path
 
+# Resolve project directory for both supported layouts:
+# 1) repo/src
+# 2) repo/crop-yield-prediction/src
+SCRIPT_DIR = Path(__file__).resolve().parent
+if (SCRIPT_DIR / 'src').exists():
+    PROJECT_DIR = SCRIPT_DIR
+elif (SCRIPT_DIR / 'crop-yield-prediction' / 'src').exists():
+    PROJECT_DIR = SCRIPT_DIR / 'crop-yield-prediction'
+else:
+    raise FileNotFoundError("Could not locate 'src' directory.")
+
 # Add src to path to import modules
-sys.path.insert(0, str(Path(__file__).parent / 'src'))
+sys.path.insert(0, str(PROJECT_DIR / 'src'))
 
 import pandas as pd
 import numpy as np
@@ -25,10 +36,10 @@ from utils import create_directories, save_dict_to_json, load_dict_from_json, sa
 
 # Configuration
 CONFIG = {
-    'data_path': 'data/crop_yield_data.csv',
-    'models_dir': 'models',
-    'outputs_dir': 'outputs',
-    'model_save_path': 'models/crop_yield_rf_pipeline.joblib',
+    'data_path': str(PROJECT_DIR / 'data' / 'crop_yield_data.csv'),
+    'models_dir': str(PROJECT_DIR / 'models'),
+    'outputs_dir': str(PROJECT_DIR / 'outputs'),
+    'model_save_path': str(PROJECT_DIR / 'models' / 'crop_yield_rf_pipeline.joblib'),
     'random_state': 42,
     'test_size': 0.2,
     'cv_folds': 5,

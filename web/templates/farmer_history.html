@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="card">
+    <h2>Prediction History</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Input</th>
+                <th>Predicted Yield</th>
+                <th>Timestamp (UTC)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in history %}
+            <tr>
+                <td>{{ item.id }}</td>
+                <td><pre>{{ item.input | tojson(indent=2) }}</pre></td>
+                <td>{{ '%.2f'|format(item.predicted_yield) }}</td>
+                <td>{{ item.created_at }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4">No predictions yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}
