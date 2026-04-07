@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="card">
+    <h2>System Health</h2>
+    <p class="muted">Operational status summary for core platform dependencies.</p>
+
+    <div class="stats-grid">
+        <div class="stat-box"><strong>{{ health['status']|upper }}</strong><span>Overall Status</span></div>
+        <div class="stat-box"><strong>{{ health['service'] }}</strong><span>Service</span></div>
+        <div class="stat-box"><strong>{{ health['checks']['database']|upper }}</strong><span>Database</span></div>
+        <div class="stat-box"><strong>{{ health['checks']['model']|upper }}</strong><span>Model</span></div>
+    </div>
+
+    <table style="margin-top: 14px;">
+        <tbody>
+            <tr>
+                <th>Generated At</th>
+                <td>{{ health['timestamp'] }}</td>
+            </tr>
+            {% if health.get('error') %}
+            <tr>
+                <th>Error</th>
+                <td>{{ health['error'] }}</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

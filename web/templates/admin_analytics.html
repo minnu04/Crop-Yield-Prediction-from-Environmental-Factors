@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="card">
+    <h2>Analytics Overview</h2>
+    <p class="muted">Human-readable analytics summary for admin review.</p>
+
+    <div class="stats-grid">
+        <div class="stat-box"><strong>{{ summary['users'] }}</strong><span>Total Users</span></div>
+        <div class="stat-box"><strong>{{ summary['farmers'] }}</strong><span>Farmers</span></div>
+        <div class="stat-box"><strong>{{ summary['pendingApproval'] }}</strong><span>Pending Approval</span></div>
+        <div class="stat-box"><strong>{{ summary['predictions'] }}</strong><span>Total Predictions</span></div>
+        <div class="stat-box"><strong>{{ '%.2f'|format(summary['avgYield']) }}</strong><span>Average Predicted Yield</span></div>
+    </div>
+</section>
+
+<section class="admin-grid">
+    <article class="card">
+        <h3>7-Day Prediction Trend</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Predictions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in trend %}
+                <tr>
+                    <td>{{ item['date'] }}</td>
+                    <td>{{ item['count'] }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="2">No trend data available.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </article>
+
+    <article class="card">
+        <h3>Crop and Risk Distribution</h3>
+        <div class="distribution-grid">
+            <div>
+                <h4>Crop Distribution</h4>
+                <ul class="insight-list">
+                    {% for item in crop_distribution %}
+                    <li class="insight-item">
+                        <div><strong>{{ item['crop']|title }}</strong></div>
+                        <span class="impact positive">{{ item['count'] }}</span>
+                    </li>
+                    {% else %}
+                    <li class="placeholder">No crop data available.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div>
+                <h4>Risk Distribution</h4>
+                <ul class="insight-list">
+                    {% for item in risk_distribution %}
+                    <li class="insight-item">
+                        <div><strong>{{ item['level']|title }}</strong></div>
+                        <span class="impact {{ 'negative' if item['level'] == 'high' else 'positive' }}">{{ item['count'] }}</span>
+                    </li>
+                    {% else %}
+                    <li class="placeholder">No risk data available.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </article>
+</section>
+
+<section class="card">
+    <h3>Recent Predictions</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>User</th>
+                <th>Predicted Yield</th>
+                <th>Timestamp (UTC)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in recent_predictions %}
+            <tr>
+                <td>{{ row['id'] }}</td>
+                <td>{{ row['username'] }}</td>
+                <td>{{ '%.2f'|format(row['predicted_yield']) }}</td>
+                <td>{{ row['created_at'] }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4">No predictions yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

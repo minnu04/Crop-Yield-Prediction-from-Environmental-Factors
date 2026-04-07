@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ title or 'Crop Yield Portal' }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=20260407">
 </head>
 <body>
     <header class="topbar">
@@ -43,5 +43,7 @@
         {% block content %}{% endblock %}
         <p class="footer-note">Crop Yield Prediction Platform</p>
     </main>
+
+    <script src="{{ url_for('static', filename='dashboard.js') }}?v=20260407" defer></script>
 </body>
 </html>

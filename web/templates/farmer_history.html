@@ -1,12 +1,26 @@
 {% extends 'base.html' %}
 {% block content %}
 <section class="card">
-    <h2>Prediction History</h2>
+    <div class="section-head compact">
+        <div>
+            <h2>Prediction History</h2>
+            <p class="muted small">Readable history table with export support for reports and demo submissions.</p>
+        </div>
+        <div class="button-row">
+            <a class="history-link-btn" href="{{ url_for('farmer_history_export_csv') }}">Download CSV</a>
+            <a class="history-link-btn" href="{{ url_for('farmer_history_api') }}" target="_blank" rel="noopener">Open JSON API</a>
+        </div>
+    </div>
     <table>
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Input</th>
+                <th>Crop</th>
+                <th>NPK</th>
+                <th>pH</th>
+                <th>Organic Matter</th>
+                <th>Weather</th>
+                <th>Fertilizer</th>
                 <th>Predicted Yield</th>
                 <th>Timestamp (UTC)</th>
             </tr>
@@ -15,13 +29,18 @@
             {% for item in history %}
             <tr>
                 <td>{{ item.id }}</td>
-                <td><pre>{{ item.input | tojson(indent=2) }}</pre></td>
+                <td>{{ item.crop_type }}</td>
+                <td>{{ item.nutrients }}</td>
+                <td>{{ item.ph }}</td>
+                <td>{{ item.organic_matter }}</td>
+                <td>{{ item.weather }}</td>
+                <td>{{ item.fertilizer_usage }}</td>
                 <td>{{ '%.2f'|format(item.predicted_yield) }}</td>
                 <td>{{ item.created_at }}</td>
             </tr>
             {% else %}
             <tr>
-                <td colspan="4">No predictions yet.</td>
+                <td colspan="9">No predictions yet.</td>
             </tr>
             {% endfor %}
         </tbody>

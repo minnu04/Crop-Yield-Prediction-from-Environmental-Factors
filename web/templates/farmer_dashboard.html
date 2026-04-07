@@ -1,53 +1,301 @@
 {% extends 'base.html' %}
 {% block content %}
-<section class="card">
-    <h2>Farmer Dashboard</h2>
-    <p class="muted">Enter field and weather factors to estimate crop yield.</p>
-
-    <form method="post" action="{{ url_for('farmer_predict') }}" class="form-grid two-col">
-        <label>N
-            <input type="number" step="any" name="N" required>
-        </label>
-        <label>P
-            <input type="number" step="any" name="P" required>
-        </label>
-        <label>K
-            <input type="number" step="any" name="K" required>
-        </label>
-        <label>pH
-            <input type="number" step="any" name="pH" required>
-        </label>
-        <label>Organic Matter
-            <input type="number" step="any" name="organic_matter" required>
-        </label>
-        <label>Rainfall
-            <input type="number" step="any" name="rainfall" required>
-        </label>
-        <label>Temp Min
-            <input type="number" step="any" name="temp_min" required>
-        </label>
-        <label>Temp Max
-            <input type="number" step="any" name="temp_max" required>
-        </label>
-        <label>Fertilizer Usage
-            <input type="number" step="any" name="fertilizer_usage" required>
-        </label>
-        <label>Crop Type
-            <select name="crop_type" required>
-                {% for crop in crop_types %}
-                <option value="{{ crop }}">{{ crop }}</option>
-                {% endfor %}
-            </select>
-        </label>
-        <button type="submit" class="full-width">Predict Yield</button>
-    </form>
-</section>
-
-{% if predicted_yield is defined %}
-<section class="card success-box">
-    <h3>Prediction Result</h3>
-    <p class="big-number">{{ '%.2f'|format(predicted_yield) }}</p>
-    <p class="muted">Estimated crop yield units</p>
-</section>
+{% if prediction_result %}
+<div id="initial-prediction-data" class="sr-only" data-json='{{ prediction_result | tojson | forceescape }}'></div>
 {% endif %}
+
+<section class="hero-card">
+    <div>
+        <p class="eyebrow">Farmer Intelligence Dashboard</p>
+        <h2>Predict yield, inspect risk, and improve decisions in one view.</h2>
+        <p class="hero-copy">Use the live dashboard to estimate yield, compare crop choices, and review the strongest limiting factors for your current field conditions.</p>
+        <div class="hero-metrics">
+            <div>
+                <span>Demo mode</span>
+                <strong>Ready</strong>
+            </div>
+            <div>
+                <span>Response schema</span>
+                <strong>Yield + risk + advice</strong>
+            </div>
+            <div>
+                <span>Model</span>
+                <strong>Random Forest</strong>
+            </div>
+        </div>
+    </div>
+    <div class="hero-actions">
+        <button type="button" id="demo-fill">Load Demo Values</button>
+        <button type="button" id="clear-form" class="secondary-btn">Reset Form</button>
+    </div>
+</section>
+
+<div class="dashboard-layout">
+    <section class="card input-panel">
+        <div class="section-head">
+            <div>
+                <p class="eyebrow">Input Panel</p>
+                <h3>Field conditions</h3>
+            </div>
+            <span class="status-pill" id="input-status">Waiting for input</span>
+        </div>
+
+        <div class="weather-mode-card">
+            <div class="mode-switch">
+                <label class="mode-option">
+                    <input type="radio" name="input_mode" value="manual" checked>
+                    <span>Manual input mode</span>
+                </label>
+                <label class="mode-option">
+                    <input type="radio" name="input_mode" value="weather">
+                    <span>Weather-assisted mode</span>
+                </label>
+            </div>
+
+            <div id="weather-panel" class="weather-panel hidden">
+                <div class="weather-grid">
+                    <label>District / State
+                        <input type="text" id="weather-location" placeholder="e.g., Warangal, Telangana">
+                    </label>
+                    <label>Latitude (optional)
+                        <input type="number" step="any" id="weather-latitude" placeholder="17.9784">
+                    </label>
+                    <label>Longitude (optional)
+                        <input type="number" step="any" id="weather-longitude" placeholder="79.5941">
+                    </label>
+                </div>
+                <div class="button-row weather-actions">
+                    <button type="button" id="fetch-weather" class="secondary-btn">Fetch Forecast</button>
+                    <span class="weather-status" id="weather-status">Weather mode inactive.</span>
+                </div>
+            </div>
+        </div>
+
+        <form id="prediction-form" method="post" action="{{ url_for('farmer_predict') }}" data-api-url="{{ url_for('predict_yield_api') }}" class="form-grid two-col">
+            <label>N
+                <input type="number" step="any" name="N" required>
+            </label>
+            <label>P
+                <input type="number" step="any" name="P" required>
+            </label>
+            <label>K
+                <input type="number" step="any" name="K" required>
+            </label>
+            <label>pH
+                <input type="number" step="any" name="pH" required>
+            </label>
+            <label>Organic Matter
+                <input type="number" step="any" name="organic_matter" required>
+            </label>
+            <label>Rainfall (mm)
+                <input type="number" step="any" name="rainfall" required>
+            </label>
+            <label>Temp Min (°C)
+                <input type="number" step="any" name="temp_min" required>
+            </label>
+            <label>Temp Max (°C)
+                <input type="number" step="any" name="temp_max" required>
+            </label>
+            <label>Fertilizer Usage
+                <input type="number" step="any" name="fertilizer_usage" required>
+            </label>
+            <label>Crop Type
+                <select name="crop_type" required>
+                    {% for crop in crop_types %}
+                    <option value="{{ crop }}">{{ crop }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <div class="button-row full-width">
+                <button type="submit">Run Prediction</button>
+                <button type="button" class="secondary-btn" id="demo-submit">Demo Predict</button>
+            </div>
+        </form>
+
+    </section>
+
+    <section class="results-panel">
+        <article class="card result-card result-span-full">
+            <div class="section-head compact">
+                <div>
+                    <p class="eyebrow">Prediction</p>
+                    <h3 id="prediction-value">Awaiting prediction</h3>
+                </div>
+                <span class="risk-badge neutral" id="risk-badge">No result</span>
+            </div>
+            <p class="muted" id="prediction-subtitle">Enter field values and run the model to see yield, confidence, and recommendations.</p>
+            <div class="confidence-line">
+                <div>
+                    <span class="mini-label">Confidence score</span>
+                    <strong id="confidence-score">--</strong>
+                </div>
+                <div>
+                    <span class="mini-label">Range</span>
+                    <strong id="confidence-range">--</strong>
+                </div>
+            </div>
+            <div class="confidence-track" aria-hidden="true">
+                <div class="confidence-fill" id="confidence-fill"></div>
+            </div>
+        </article>
+
+        <article class="card feature-card result-span-full">
+            <div class="section-head compact">
+                <div>
+                    <p class="eyebrow">Feature contributions</p>
+                    <h3>What is driving the prediction</h3>
+                </div>
+            </div>
+            <div class="split-grid">
+                <div>
+                    <h4>Helping factors</h4>
+                    <ul class="insight-list" id="positive-factors">
+                        <li class="placeholder">Awaiting prediction...</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Limiting factors</h4>
+                    <ul class="insight-list" id="negative-factors">
+                        <li class="placeholder">Awaiting prediction...</li>
+                    </ul>
+                </div>
+            </div>
+            <p class="summary-text" id="explanation-summary">The model will explain the strongest positive and negative inputs after prediction.</p>
+        </article>
+
+        <article class="card signal-card result-span-full">
+            <div class="section-head compact">
+                <div>
+                    <p class="eyebrow">Signal map</p>
+                    <h3>Explainability at a glance</h3>
+                </div>
+            </div>
+            <p class="summary-text narrative-headline" id="narrative-headline">The model will turn the raw prediction into a short decision summary.</p>
+            <ul class="narrative-list" id="narrative-highlights">
+                <li class="placeholder">Narrative insights will appear here after prediction.</li>
+            </ul>
+            <div class="driver-map" id="driver-breakdown">
+                <div class="placeholder-card">No signal map yet.</div>
+            </div>
+        </article>
+
+        <article class="card risk-card result-span-full">
+            <div class="section-head compact">
+                <div>
+                    <p class="eyebrow">Risk alert</p>
+                    <h3>Yield risk status</h3>
+                </div>
+            </div>
+            <div class="split-grid">
+                <div>
+                    <h4>Risk reasons</h4>
+                    <ul class="risk-list" id="risk-reasons">
+                        <li class="placeholder">No risk analysis yet.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Likely stress factors</h4>
+                    <ul class="risk-list" id="stress-factors">
+                        <li class="placeholder">No stress factors detected.</li>
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <article class="card recommendation-card result-span-full">
+            <div class="section-head compact">
+                <div>
+                    <p class="eyebrow">Crop recommendation</p>
+                    <h3>Best crop for the same conditions</h3>
+                </div>
+            </div>
+            <div class="recommendation-block">
+                <div>
+                    <span class="mini-label">Best crop</span>
+                    <strong id="best-crop">--</strong>
+                </div>
+                <span class="status-pill" id="recommendation-alert">Awaiting comparison</span>
+                <p class="muted" id="selection-note">The recommendation engine will compare all supported crops and rank them by expected yield.</p>
+            </div>
+            <div id="crop-ranking" class="ranking-grid">
+                <div class="placeholder-card">No crop comparison yet.</div>
+            </div>
+        </article>
+
+        <article class="card advisory-card result-span-full">
+            <div class="section-head compact">
+                <div>
+                    <p class="eyebrow">Action plan</p>
+                    <h3>Farmer advisory</h3>
+                </div>
+            </div>
+            <ul class="insight-list" id="advisory-list">
+                <li class="placeholder">Actionable advice will appear here after prediction.</li>
+            </ul>
+        </article>
+    </section>
+</div>
+
+<section class="card simulator-card">
+    <div class="section-head">
+        <div>
+            <p class="eyebrow">What-if simulator</p>
+            <h3>See how changes affect the forecast</h3>
+        </div>
+        <span class="status-pill" id="simulator-status">Awaiting scenario</span>
+    </div>
+
+    <div class="simulator-grid">
+        <div class="slider-stack">
+            <label>
+                Rainfall adjustment (mm)
+                <input type="range" id="rainfall-slider" min="60" max="360" step="5" value="220">
+                <div class="slider-meta"><span>Dry</span><strong id="rainfall-slider-value">220 mm</strong><span>Wet</span></div>
+            </label>
+            <label>
+                Fertilizer adjustment (kg/ha)
+                <input type="range" id="fertilizer-slider" min="40" max="220" step="5" value="120">
+                <div class="slider-meta"><span>Low</span><strong id="fertilizer-slider-value">120 kg/ha</strong><span>High</span></div>
+            </label>
+            <label>
+                Temperature shift (°C)
+                <input type="range" id="temperature-slider" min="-6" max="6" step="1" value="0">
+                <div class="slider-meta"><span>Cooler</span><strong id="temperature-slider-value">0 °C</strong><span>Warmer</span></div>
+            </label>
+        </div>
+
+        <div class="simulation-summary">
+            <div class="comparison-grid">
+                <div class="comparison-card baseline">
+                    <span class="mini-label">Baseline</span>
+                    <strong id="baseline-yield">--</strong>
+                    <small id="baseline-confidence">Confidence: --</small>
+                </div>
+                <div class="comparison-card scenario">
+                    <span class="mini-label">Adjusted scenario</span>
+                    <strong id="scenario-yield">--</strong>
+                    <small id="scenario-confidence">Confidence: --</small>
+                </div>
+            </div>
+            <div class="delta-strip">
+                <div>
+                    <span class="mini-label">Yield change</span>
+                    <strong id="yield-delta">--</strong>
+                </div>
+                <div>
+                    <span class="mini-label">Risk change</span>
+                    <strong id="risk-delta">--</strong>
+                </div>
+            </div>
+            <div class="comparison-bars">
+                <div>
+                    <span class="mini-label">Baseline vs scenario</span>
+                    <div class="bar-track"><div class="bar-fill baseline" id="baseline-bar"></div></div>
+                    <div class="bar-track"><div class="bar-fill scenario" id="scenario-bar"></div></div>
+                </div>
+            </div>
+            <p class="summary-text" id="scenario-summary">Move the sliders to see how yield and risk change.</p>
+        </div>
+    </div>
+</section>
 {% endblock %}

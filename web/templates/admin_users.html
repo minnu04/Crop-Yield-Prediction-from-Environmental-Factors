@@ -41,6 +41,8 @@
                 <td>
                     {% if user['role'] == 'farmer' and user['approved'] == 0 %}
                     <span class="muted">Pending Approval</span>
+                    {% elif user['role'] == 'farmer' and user['approved'] == -1 %}
+                    <span class="muted">Rejected</span>
                     {% else %}
                     <span class="muted">Approved</span>
                     {% endif %}
@@ -51,6 +53,13 @@
                     <form method="post" action="{{ url_for('admin_approve_user', user_id=user['id']) }}" style="margin-bottom: 8px;">
                         <button type="submit">Approve</button>
                     </form>
+                        <form method="post" action="{{ url_for('admin_reject_user', user_id=user['id']) }}" style="margin-bottom: 8px;">
+                            <button type="submit" class="danger">Reject</button>
+                        </form>
+                    {% elif user['role'] == 'farmer' and user['approved'] == -1 %}
+                        <form method="post" action="{{ url_for('admin_approve_user', user_id=user['id']) }}" style="margin-bottom: 8px;">
+                            <button type="submit">Re-Approve</button>
+                        </form>
                     {% endif %}
                     {% if user['id'] != current_user.id %}
                     <form method="post" action="{{ url_for('admin_delete_user', user_id=user['id']) }}">

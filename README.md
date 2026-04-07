@@ -147,6 +147,34 @@ Important:
 - change the default admin password after first login by creating a new admin user and removing the default account.
 - if model file is missing, train first using `python main.py --mode train-only`.
 
+### Weather-Assisted Mode Configuration
+
+Optional environment variables for weather integration:
+
+```text
+WEATHER_PROVIDER=open-meteo
+WEATHER_API_KEY=your_openweather_key_if_using_openweather
+WEATHER_TIMEOUT_SECONDS=10
+```
+
+Recommended setup:
+
+1. Copy `.env.example` to `.env` in the project root.
+2. For free weather access with no key, keep `WEATHER_PROVIDER=open-meteo`.
+3. If you want to provide your own API key, set:
+
+```text
+WEATHER_PROVIDER=openweather
+WEATHER_API_KEY=your_actual_openweather_api_key
+```
+
+The app now loads `.env` automatically at startup.
+
+Notes:
+- keyless mode uses `open-meteo`.
+- set `WEATHER_PROVIDER=openweather` only if you provide `WEATHER_API_KEY`.
+- if live weather fetch fails, the app gracefully falls back to estimated local conditions so weather-assisted mode still works.
+
 3. **Using Your Own Data**:
    Place your CSV file at `data/crop_yield_data.csv` with the schema described above, then run:
    ```bash
